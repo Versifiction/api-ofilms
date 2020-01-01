@@ -3,11 +3,15 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.get("/api/message", (req, res) => {
+app.get("/", (req, res) => {
+  res.json({ message: "Bienvenue sur l'API O'Films" });
+});
+
+app.get("/message", (req, res) => {
   res.json({ message: "Test déploiement d'O'Films sur Heroku" });
 });
 
-app.get("/api/hello", (req, res) => {
+app.get("/hello", (req, res) => {
   res.json({ message: "Hello world !" });
 });
 
