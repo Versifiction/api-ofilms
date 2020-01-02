@@ -27,6 +27,8 @@ var whitelist = [
   process.env.SERVER_PORT
 ];
 
+console.log("whitelist ", whitelist);
+
 var corsOptions = {
   origin: function(origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
