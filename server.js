@@ -21,20 +21,6 @@ require("./config/passport")(passport);
 
 app.use(morgan("tiny"));
 
-if (process.env.NODE_ENV === "production") {
-  console.log("PROD ENV ", process.env.NODE_ENV);
-
-  app.use(express.static("build"));
-  app.get("*", (req, res) => res.sendFile(path.resolve("build", "index.html")));
-}
-// else if (process.env.NODE_ENV === "development") {
-//   console.log("DEV ENV ", process.env.NODE_ENV);
-//   app.use(express.static("public"));
-//   app.get("*", (req, res) =>
-//     res.sendFile(path.resolve("public", "index.html"))
-//   );
-// }
-
 var whitelist = [
   process.env.CLIENT_PORT,
   process.env.CLIENT_PRODUCTION,
