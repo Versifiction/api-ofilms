@@ -34,8 +34,14 @@ const UserSchema = new Schema({
     default: Date.now
   },
   lastConnection: Date,
-  resetPasswordToken: String,
-  resetPasswordExpires: Date,
+  resetPasswordToken: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
+  },
   isVerified: Boolean,
   isFounder: Boolean,
   isAdmin: Boolean,
