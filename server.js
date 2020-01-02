@@ -13,7 +13,7 @@ const ObjectId = require("mongodb").ObjectId;
 const db = require("./config/keys").mongoURI;
 const port = process.env.PORT || 5000;
 const app = express();
-const server = app.listen(5000);
+const server = app.listen(port);
 const io = require("socket.io").listen(server);
 
 require("dotenv").config();
