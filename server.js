@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const passport = require("passport");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const path = require("path");
 const morgan = require("morgan");
 const users = require("./routes/api/users");
@@ -19,6 +20,16 @@ require("dotenv").config();
 require("./config/passport")(passport);
 
 app.use(morgan("tiny"));
+app.use(
+  cors({
+    origin: [
+      process.env.CLIENT_PORT,
+      process.env.CLIENT_PRODUCTION,
+      process.env.SERVER_PORT
+    ],
+    credentials: true
+  })
+);
 
 app.use(
   bodyParser.urlencoded({
