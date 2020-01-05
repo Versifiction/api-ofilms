@@ -22,6 +22,17 @@ const io = require("socket.io").listen(server);
 require("dotenv").config();
 require("./config/passport")(passport);
 
+var whitelist = ["http://localhost:3000", "https://ofilms.herokuapp.com"];
+var corsOptions = {
+  origin: function(origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  }
+};
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // équivaut à 15 minutes
   max: 100 // requêtes max par Ip dans le délai indiqué (windowMS, soit 15min)
@@ -53,7 +64,7 @@ app.use("/api/users", users);
 app.use("/api/chat", chat);
 app.use("/api/date", date);
 
-app.get("/", function(req, res) {
+app.get("/", cors(corsOptions), function(req, res) {
   res.send(
     `Bienvenue sur l'API d'O'Films. Nous sommes le ${moment(new Date())
       .locale("fr")
