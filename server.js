@@ -39,7 +39,7 @@ var corsOptions = {
   }
 };
 
-app.options("*", cors(corsOptions));
+app.get("*", cors(corsOptions));
 app.use(
   bodyParser.urlencoded({
     extended: false
