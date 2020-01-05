@@ -22,14 +22,14 @@ require("dotenv").config();
 require("./config/passport")(passport);
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
+  windowMs: 15 * 60 * 1000, // équivaut à 15 minutes
+  max: 100 // requêtes max par Ip dans le délai indiqué (windowMS, soit 15min)
 });
 
-app.use(xss());
-app.use(limiter);
-app.use(morgan("tiny"));
-app.use(helmet());
+app.use(xss()); // protège des failles XSS en nettoyant tous les req.body, req.query et req.params
+app.use(limiter); //
+app.use(morgan("tiny")); // log dans le serveur à chaque requête efectuée sur une route, "tiny" log le minimum
+app.use(helmet()); // sécurise l'app avec des headers HTTP
 app.use(
   cors({
     origin: [
@@ -39,7 +39,7 @@ app.use(
     ],
     credentials: true
   })
-);
+); // configuration des CORS avec des origines dynamiques
 
 app.use(
   bodyParser.urlencoded({
