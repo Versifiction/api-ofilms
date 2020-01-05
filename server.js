@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const passport = require("passport");
 const mongoose = require("mongoose");
+const moment = require("moment");
 const cors = require("cors");
 const path = require("path");
 const morgan = require("morgan");
@@ -11,7 +12,6 @@ const xss = require("xss-clean");
 const users = require("./routes/api/users");
 const chat = require("./routes/api/chat");
 const date = require("./routes/api/date");
-const root = require("./routes/api/root");
 const ObjectId = require("mongodb").ObjectId;
 const db = require("./config/keys").mongoURI;
 const port = process.env.PORT || 5000;
@@ -52,7 +52,14 @@ app.use(passport.initialize());
 app.use("/api/users", users);
 app.use("/api/chat", chat);
 app.use("/api/date", date);
-app.use("/api/root", root);
+
+app.get("/", function(req, res) {
+  res.send(
+    `Bienvenue sur l'API d'O'Films. Nous sommes le ${moment(new Date())
+      .locale("fr")
+      .format("LLLL")}`
+  );
+});
 
 let Message = require("./models/ChatMessage");
 let typingusers = [];
