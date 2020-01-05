@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 const isEmpty = require("is-empty");
@@ -17,7 +18,18 @@ let User = require("../../models/User");
 
 const BCRYPT_SALT_ROUNDS = 12;
 
-router.post("/register", async function(req, res) {
+var whitelist = ["http://localhost:3000", "https://ofilms.herokuapp.com"];
+var corsOptions = {
+  origin: function(origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  }
+};
+
+router.post("/register", cors(corsOptions), async function(req, res) {
   const { errors, isValid } = validateRegisterInput(req.body);
 
   if (!isValid) {
@@ -81,7 +93,7 @@ router.post("/register", async function(req, res) {
   };
 });
 
-router.post("/login", (req, res) => {
+router.post("/login", cors(corsOptions), (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
 
   if (!isValid) {
@@ -133,7 +145,7 @@ router.post("/login", (req, res) => {
   };
 });
 
-router.post("/forgotPassword", (req, res) => {
+router.post("/forgotPassword", cors(corsOptions), (req, res) => {
   const { errors, isValid } = validateResetPassword(req.body);
 
   if (!isValid) {
@@ -207,7 +219,7 @@ router.post("/forgotPassword", (req, res) => {
     }
   });
 
-  router.get("/resetPassword", (req, res) => {
+  router.get("/resetPassword", cors(corsOptions), (req, res) => {
     User.findOne({
       resetPasswordToken: req.query.resetPasswordToken,
       resetPasswordExpires: {
@@ -229,7 +241,7 @@ router.post("/forgotPassword", (req, res) => {
   });
 });
 
-router.put("/updatePasswordViaEmail", (req, res) => {
+router.put("/updatePasswordViaEmail", cors(corsOptions), (req, res) => {
   User.findOne({
     email: req.body.email,
     resetPasswordToken: req.body.resetPasswordToken,
@@ -279,25 +291,28 @@ router.put("/updatePasswordViaEmail", (req, res) => {
   });
 });
 
-router.get("/getAll", async function(req, res) {
+router.get("/getAll", cors(corsOptions), async function(req, res) {
   const users = await User.find({});
   res.send(users);
 });
 
-router.get("/my-account/:id", async function(req, res) {
+router.get("/my-account/:id", cors(corsOptions), async function(req, res) {
   const id = req.params.id;
   const o_id = new ObjectId(id);
   const user = await User.find({ _id: o_id });
   res.send(user);
 });
 
-router.get("/user/:username", async function(req, res) {
+router.get("/user/:username", cors(corsOptions), async function(req, res) {
   const username = req.params.username;
   const user = await User.find({ username: username });
   res.send(user);
 });
 
-router.get("/user/:id/moviesLiked/:movie", async function(req, res) {
+router.get("/user/:id/moviesLiked/:movie", cors(corsOptions), async function(
+  req,
+  res
+) {
   const id = req.params.id;
   const movie = req.params.movie;
   const user = await User.find({
@@ -307,7 +322,10 @@ router.get("/user/:id/moviesLiked/:movie", async function(req, res) {
   res.send(user);
 });
 
-router.get("/user/:id/seriesLiked/:serie", async function(req, res) {
+router.get("/user/:id/seriesLiked/:serie", cors(corsOptions), async function(
+  req,
+  res
+) {
   const id = req.params.id;
   const serie = req.params.serie;
   const user = await User.find({
@@ -318,123 +336,157 @@ router.get("/user/:id/seriesLiked/:serie", async function(req, res) {
   res.send(user);
 });
 
-router.get("/user/:id/moviesFavorites/:movie", async function(req, res) {
-  const id = req.params.id;
-  const movie = req.params.movie;
-  const user = await User.find({
-    _id: id,
-    moviesFavorites: { $in: { moviesFavorites: [movie] } }
-  });
-  res.send(user);
-});
+router.get(
+  "/user/:id/moviesFavorites/:movie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const movie = req.params.movie;
+    const user = await User.find({
+      _id: id,
+      moviesFavorites: { $in: { moviesFavorites: [movie] } }
+    });
+    res.send(user);
+  }
+);
 
-router.get("/user/:id/seriesFavorites/:serie", async function(req, res) {
-  const id = req.params.id;
-  const serie = req.params.serie;
+router.get(
+  "/user/:id/seriesFavorites/:serie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const serie = req.params.serie;
 
-  const user = await User.find({
-    _id: id,
-    seriesFavorites: { $in: { seriesFavorites: [serie] } }
-  });
-  res.send(user);
-});
+    const user = await User.find({
+      _id: id,
+      seriesFavorites: { $in: { seriesFavorites: [serie] } }
+    });
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/add/seriesLiked/:serie", async function(req, res) {
-  const id = req.params.id;
-  const serie = req.params.serie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $addToSet: { seriesLiked: serie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/add/seriesLiked/:serie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const serie = req.params.serie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $addToSet: { seriesLiked: serie } }
+    );
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/add/moviesLiked/:movie", async function(req, res) {
-  const id = req.params.id;
-  const movie = req.params.movie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $addToSet: { moviesLiked: movie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/add/moviesLiked/:movie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const movie = req.params.movie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $addToSet: { moviesLiked: movie } }
+    );
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/add/moviesFavorites/:movie", async function(req, res) {
-  const id = req.params.id;
-  const movie = req.params.movie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $addToSet: { moviesFavorites: movie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/add/moviesFavorites/:movie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const movie = req.params.movie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $addToSet: { moviesFavorites: movie } }
+    );
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/add/seriesFavorites/:serie", async function(req, res) {
-  const id = req.params.id;
-  const serie = req.params.serie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $addToSet: { seriesFavorites: serie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/add/seriesFavorites/:serie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const serie = req.params.serie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $addToSet: { seriesFavorites: serie } }
+    );
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/remove/seriesLiked/:serie", async function(req, res) {
-  const id = req.params.id;
-  const serie = req.params.serie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $pull: { seriesLiked: serie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/remove/seriesLiked/:serie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const serie = req.params.serie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $pull: { seriesLiked: serie } }
+    );
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/remove/moviesLiked/:movie", async function(req, res) {
-  const id = req.params.id;
-  const movie = req.params.movie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $pull: { moviesLiked: movie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/remove/moviesLiked/:movie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const movie = req.params.movie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $pull: { moviesLiked: movie } }
+    );
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/remove/moviesFavorites/:movie", async function(
-  req,
-  res
-) {
-  const id = req.params.id;
-  const movie = req.params.movie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $pull: { moviesFavorites: movie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/remove/moviesFavorites/:movie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const movie = req.params.movie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $pull: { moviesFavorites: movie } }
+    );
+    res.send(user);
+  }
+);
 
-router.post("/user/:id/remove/seriesFavorites/:serie", async function(
-  req,
-  res
-) {
-  const id = req.params.id;
-  const serie = req.params.serie;
-  const o_id = new ObjectId(id);
-  const user = await User.updateOne(
-    { _id: o_id },
-    { $pull: { seriesFavorites: serie } }
-  );
-  res.send(user);
-});
+router.post(
+  "/user/:id/remove/seriesFavorites/:serie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const serie = req.params.serie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $pull: { seriesFavorites: serie } }
+    );
+    res.send(user);
+  }
+);
 
 // Defined delete | remove | destroy route
-router.delete("/delete/:id", async function(req, res) {
+router.delete("/delete/:id", cors(corsOptions), async function(req, res) {
   const id = req.params.id;
   const user = User.findByIdAndRemove({ _id: id });
   res.send(user);

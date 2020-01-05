@@ -64,7 +64,7 @@ app.use("/api/users", users);
 app.use("/api/chat", chat);
 app.use("/api/date", date);
 
-app.get("/", cors(corsOptions), function(req, res) {
+app.get("/", function(req, res) {
   res.send(
     `Bienvenue sur l'API d'O'Films. Nous sommes le ${moment(new Date())
       .locale("fr")
