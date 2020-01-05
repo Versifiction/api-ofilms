@@ -6,7 +6,8 @@ const cors = require("cors");
 const path = require("path");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
-const helmer = require("helmet");
+const helmet = require("helmet");
+const xss = require("xss-clean");
 const users = require("./routes/api/users");
 const chat = require("./routes/api/chat");
 const date = require("./routes/api/date");
@@ -59,7 +60,6 @@ let typingusers = [];
 io.on("connection", function(socket) {
   socket.on("send message", async function(message) {
     try {
-      console.log("message envoyé");
       io.emit("send message", message);
       const sent = await Message.create(message, function(err, res) {
         if (err) throw err;
@@ -71,7 +71,6 @@ io.on("connection", function(socket) {
 
   socket.on("delete message", async function(message) {
     try {
-      console.log("message supprimé");
       io.emit("delete message", message);
       const id = message.id;
       const o_id = new ObjectId(id);

@@ -26,30 +26,30 @@ router.post("/register", async function(req, res) {
 
   const user = await User.find(
     {
-      $or: [{ email: sanitize(req.body.email) }, { username: sanitize(req.body.username) }]
+      $or: [{ email: req.body.email }, { username: req.body.username }]
     },
     function(err, docs) {
       if (docs.length !== 0) {
-        if (docs[0].email === sanitize(req.body.email)) {
+        if (docs[0].email === req.body.email) {
           errors.email = "L'adresse email est déjà prise";
           return res
             .status(400)
             .json({ email: "L'adresse email est déjà prise" });
-        } else if (docs[0].username === sanitize(req.body.username)) {
+        } else if (docs[0].username === req.body.username) {
           errors.username = "Le pseudo est déjà pris";
           return res.status(400).json({ username: "Le pseudo est déjà pris" });
         }
       } else {
         const newUser = new User({
-          email: sanitize(req.body.email),
-          username: sanitize(req.body.username),
-          firstname: sanitize(req.body.firstname),
-          lastname: sanitize(req.body.lastnam),
-          sexe: sanitize(req.body.sexe),
-          mobilePhone: sanitize(req.body.mobilePhone),
-          departement: sanitize(req.body.departement),
-          city: sanitize(req.body.city),
-          password: sanitize(req.body.password),
+          email: req.body.email,
+          username: req.body.username,
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          sexe: req.body.sexe,
+          mobilePhone: req.body.mobilePhone,
+          departement: req.body.departement,
+          city: req.body.city,
+          password: req.body.password,
           isAdmin: false,
           isModerator: false,
           isConnected: false,
@@ -88,8 +88,8 @@ router.post("/login", (req, res) => {
     return res.status(400).json(errors);
   }
 
-  const email = sanitize(req.body.email);
-  const password = sanitize(req.body.password);
+  const email = req.body.email;
+  const password = req.body.password;
 
   User.findOne({ email }).then(user => {
     if (!user) {
@@ -134,20 +134,15 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/forgotPassword", (req, res) => {
-  console.log("----------");
-  console.log("forgotPassword");
-  // const { errors, isValid } = validateResetPassword(req.body);
+  const { errors, isValid } = validateResetPassword(req.body);
 
-  // if (!isValid) {
-  //   return res.status(400).json(errors);
-  // }
-
-  // console.log(`forgot password of user : ${req.body.email}`);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
 
   const { email } = req.body;
 
-  // check if email is registered in the database
-  User.findOne({ sanitize(email) })
+  User.findOne({ email })
     .then(user => {
       if (user.length === 0) {
         console.log("L'adresse e-mail n'est rattachée à aucun utilisateur");
@@ -169,20 +164,6 @@ router.post("/forgotPassword", (req, res) => {
   const token = crypto.randomBytes(20).toString("hex");
   const myDate = new Date();
   const newDate = new Date(myDate);
-
-  console.log("token ", token);
-  console.log(
-    "date actuelle ",
-    moment(myDate)
-      .locale("fr")
-      .format("LLLL")
-  );
-  console.log(
-    "dans 1h ",
-    moment(newDate.setHours(newDate.getHours() + 1))
-      .locale("fr")
-      .format("LLLL")
-  );
 
   // if the email exists, run this update to the account with the associated email
   User.updateOne(
@@ -227,10 +208,8 @@ router.post("/forgotPassword", (req, res) => {
   });
 
   router.get("/resetPassword", (req, res) => {
-    console.log("----------");
-    console.log("resetPassword");
     User.findOne({
-      resetPasswordToken: sanitize(req.query.resetPasswordToken),
+      resetPasswordToken: req.query.resetPasswordToken,
       resetPasswordExpires: {
         $gt: Date.now()
       }
@@ -252,8 +231,8 @@ router.post("/forgotPassword", (req, res) => {
 
 router.put("/updatePasswordViaEmail", (req, res) => {
   User.findOne({
-    email: sanitize(req.body.email),
-    resetPasswordToken: sanitize(req.body.resetPasswordToken),
+    email: req.body.email,
+    resetPasswordToken: req.body.resetPasswordToken,
     resetPasswordExpires: {
       $gt: new Date()
     }
@@ -266,10 +245,10 @@ router.put("/updatePasswordViaEmail", (req, res) => {
     } else if (user != null) {
       console.log("L'utilisateur existe en base de données");
       bcrypt
-        .hash(sanitize(req.body.password), BCRYPT_SALT_ROUNDS)
+        .hash(req.body.password, BCRYPT_SALT_ROUNDS)
         .then(hashedPassword => {
           User.updateOne(
-            { email: sanitize(req.body.email) },
+            { email: req.body.email },
             {
               $set: {
                 password: hashedPassword,
@@ -301,30 +280,26 @@ router.put("/updatePasswordViaEmail", (req, res) => {
 });
 
 router.get("/getAll", async function(req, res) {
-  console.log("get all users");
   const users = await User.find({});
   res.send(users);
 });
 
 router.get("/my-account/:id", async function(req, res) {
-  console.log("get my account infos");
-  const id = sanitize(req.params.id);
+  const id = req.params.id;
   const o_id = new ObjectId(id);
   const user = await User.find({ _id: o_id });
   res.send(user);
 });
 
 router.get("/user/:username", async function(req, res) {
-  console.log(`get infos of user : ${req.params.username}`);
-  const username = sanitize(req.params.username);
+  const username = req.params.username;
   const user = await User.find({ username: username });
   res.send(user);
 });
 
 router.get("/user/:id/moviesLiked/:movie", async function(req, res) {
-  console.log(`get moviesLiked list of user ${req.params.user}`);
-  const id = sanitize(req.params.id);
-  const movie = sanitize(req.params.movie);
+  const id = req.params.id;
+  const movie = req.params.movie;
   const user = await User.find({
     _id: id,
     moviesLiked: { $in: { moviesLiked: [movie] } }
@@ -333,9 +308,8 @@ router.get("/user/:id/moviesLiked/:movie", async function(req, res) {
 });
 
 router.get("/user/:id/seriesLiked/:serie", async function(req, res) {
-  console.log(`get seriesLiked list of user ${req.params.user}`);
-  const id = sanitize(req.params.id);
-  const serie = sanitize(req.params.serie);
+  const id = req.params.id;
+  const serie = req.params.serie;
   const user = await User.find({
     _id: id,
     seriesLiked: { $in: { seriesLiked: [serie] } }
@@ -345,9 +319,8 @@ router.get("/user/:id/seriesLiked/:serie", async function(req, res) {
 });
 
 router.get("/user/:id/moviesFavorites/:movie", async function(req, res) {
-  console.log(`get moviesFavorites list of user ${req.params.id}`);
-  const id = sanitize(req.params.id);
-  const movie = sanitize(req.params.movie);
+  const id = req.params.id;
+  const movie = req.params.movie;
   const user = await User.find({
     _id: id,
     moviesFavorites: { $in: { moviesFavorites: [movie] } }
@@ -356,9 +329,8 @@ router.get("/user/:id/moviesFavorites/:movie", async function(req, res) {
 });
 
 router.get("/user/:id/seriesFavorites/:serie", async function(req, res) {
-  console.log(`get seriesFavorites list of user ${req.params.id}`);
-  const id = sanitize(req.params.id);
-  const serie = sanitize(req.params.serie);
+  const id = req.params.id;
+  const serie = req.params.serie;
 
   const user = await User.find({
     _id: id,
@@ -368,11 +340,8 @@ router.get("/user/:id/seriesFavorites/:serie", async function(req, res) {
 });
 
 router.post("/user/:id/add/seriesLiked/:serie", async function(req, res) {
-  console.log(
-    `add serie ${req.params.serie} to seriesLiked list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const serie = sanitize(req.params.serie);
+  const id = req.params.id;
+  const serie = req.params.serie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -382,11 +351,8 @@ router.post("/user/:id/add/seriesLiked/:serie", async function(req, res) {
 });
 
 router.post("/user/:id/add/moviesLiked/:movie", async function(req, res) {
-  console.log(
-    `add movie ${req.params.movie} to moviesLiked list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const movie = sanitize(req.params.movie);
+  const id = req.params.id;
+  const movie = req.params.movie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -396,11 +362,8 @@ router.post("/user/:id/add/moviesLiked/:movie", async function(req, res) {
 });
 
 router.post("/user/:id/add/moviesFavorites/:movie", async function(req, res) {
-  console.log(
-    `add movie ${req.params.movie} to moviesFavorites list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const movie = sanitize(req.params.movie);
+  const id = req.params.id;
+  const movie = req.params.movie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -410,11 +373,8 @@ router.post("/user/:id/add/moviesFavorites/:movie", async function(req, res) {
 });
 
 router.post("/user/:id/add/seriesFavorites/:serie", async function(req, res) {
-  console.log(
-    `add serie ${req.params.serie} to seriesFavorites list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const serie = sanitize(req.params.serie);
+  const id = req.params.id;
+  const serie = req.params.serie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -424,11 +384,8 @@ router.post("/user/:id/add/seriesFavorites/:serie", async function(req, res) {
 });
 
 router.post("/user/:id/remove/seriesLiked/:serie", async function(req, res) {
-  console.log(
-    `remove serie ${req.params.serie} to seriesLiked list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const serie = sanitize(req.params.serie);
+  const id = req.params.id;
+  const serie = req.params.serie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -438,11 +395,8 @@ router.post("/user/:id/remove/seriesLiked/:serie", async function(req, res) {
 });
 
 router.post("/user/:id/remove/moviesLiked/:movie", async function(req, res) {
-  console.log(
-    `remove movie ${req.params.movie} to moviesLiked list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const movie = sanitize(req.params.movie);
+  const id = req.params.id;
+  const movie = req.params.movie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -455,11 +409,8 @@ router.post("/user/:id/remove/moviesFavorites/:movie", async function(
   req,
   res
 ) {
-  console.log(
-    `remove movie ${req.params.movie} to moviesFavorites list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const movie = sanitize(req.params.movie);
+  const id = req.params.id;
+  const movie = req.params.movie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -472,11 +423,8 @@ router.post("/user/:id/remove/seriesFavorites/:serie", async function(
   req,
   res
 ) {
-  console.log(
-    `remove serie ${req.params.serie} to seriesFavorites list of user ${req.params.id}`
-  );
-  const id = sanitize(req.params.id);
-  const serie = sanitize(req.params.serie);
+  const id = req.params.id;
+  const serie = req.params.serie;
   const o_id = new ObjectId(id);
   const user = await User.updateOne(
     { _id: o_id },
@@ -487,7 +435,7 @@ router.post("/user/:id/remove/seriesFavorites/:serie", async function(
 
 // Defined delete | remove | destroy route
 router.delete("/delete/:id", async function(req, res) {
-  const id = sanitize(req.params.id)
+  const id = req.params.id;
   const user = User.findByIdAndRemove({ _id: id });
   res.send(user);
 });
