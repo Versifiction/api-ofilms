@@ -26,6 +26,7 @@ const limiter = rateLimit({
   max: 100
 });
 
+app.use(xss());
 app.use(limiter);
 app.use(morgan("tiny"));
 app.use(helmet());
