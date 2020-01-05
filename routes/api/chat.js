@@ -1,4 +1,5 @@
 const express = require("express");
+const sanitize = require("mongo-sanitize");
 const router = express.Router();
 const ObjectId = require("mongodb").ObjectId;
 
@@ -12,7 +13,7 @@ router.get("/messages", async function(req, res) {
 });
 
 router.delete("/messages/delete/:id", async function(req, res) {
-  const id = req.params.id;
+  const id = sanitize(req.params.id);
   const o_id = new ObjectId(id);
   const message = await Message.findOneAndDelete({ _id: o_id });
   res.send(message);

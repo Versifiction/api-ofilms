@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+const helmer = require("helmet");
 const users = require("./routes/api/users");
 const chat = require("./routes/api/chat");
 const date = require("./routes/api/date");
@@ -19,7 +21,14 @@ const io = require("socket.io").listen(server);
 require("dotenv").config();
 require("./config/passport")(passport);
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+
+app.use(limiter);
 app.use(morgan("tiny"));
+app.use(helmet());
 app.use(
   cors({
     origin: [
