@@ -4,7 +4,6 @@ const passport = require("passport");
 const mongoose = require("mongoose");
 const path = require("path");
 const morgan = require("morgan");
-const cors = require("cors");
 const users = require("./routes/api/users");
 const chat = require("./routes/api/chat");
 const date = require("./routes/api/date");
@@ -21,25 +20,6 @@ require("./config/passport")(passport);
 
 app.use(morgan("tiny"));
 
-var whitelist = [
-  process.env.CLIENT_PORT,
-  process.env.CLIENT_PRODUCTION,
-  process.env.SERVER_PORT
-];
-
-console.log("whitelist ", whitelist);
-
-var corsOptions = {
-  origin: function(origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  }
-};
-
-app.get("*", cors(corsOptions));
 app.use(
   bodyParser.urlencoded({
     extended: false
