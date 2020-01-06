@@ -63,7 +63,7 @@ module.exports = function validateRegisterInput(data) {
   }
 
   if (Validator.isEmpty(data.confirmPassword)) {
-    errors.confirmPassword = "La confirmation du mot de pase est requise";
+    errors.confirmPassword = "La confirmation du mot de passe est requise";
   }
 
   if (!Validator.isLength(data.password, { min: 6, max: 30 })) {
