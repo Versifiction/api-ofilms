@@ -73,11 +73,13 @@ module.exports = function validateRegisterInput(data) {
   if (Validator.isEmpty(data.sexe)) {
     errors.sexe = "Le sexe est requis";
   }
+
   if (Validator.isEmpty(data.departement)) {
-    errors.password = "Le département est requis";
+    errors.departement = "Le département est requis";
   }
+
   if (Validator.isEmpty(data.city)) {
-    errors.password = "La ville est requis";
+    errors.city = "La ville est requise";
   }
 
   if (!Validator.equals(data.password, data.confirmPassword)) {

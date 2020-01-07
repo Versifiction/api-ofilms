@@ -99,6 +99,7 @@ router.post("/register", cors(corsOptions), async function(req, res) {
 
 router.post("/login", cors(corsOptions), (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
+  console.log("errors ", errors);
 
   if (!isValid) {
     return res.status(400).json(errors);
@@ -107,11 +108,18 @@ router.post("/login", cors(corsOptions), (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  console.log("email ", email);
+  console.log("password ", password);
+
   User.findOne({ email }).then(user => {
     if (!user) {
-      errors.email = "L'adresse email existe déjà";
+      console.log("pas d'user avec ce mail");
+      errors.email = "Les identifiants rentrés ne sont pas valides";
+      errors.password = "Les identifiants rentrés ne sont pas valides";
+      return res.status(400).json(errors);
     }
 
+    console.log("un user a ce mail");
     bcrypt.compare(password, user.password).then(isMatch => {
       if (isMatch) {
         const payload = {
@@ -135,6 +143,7 @@ router.post("/login", cors(corsOptions), (req, res) => {
           );
         });
       } else {
+        console.log("mot de passe incorrect");
         errors.password = "Le mot de passe saisi n'est pas correct";
         // return res
         //   .status(400)
