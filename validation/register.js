@@ -70,6 +70,16 @@ module.exports = function validateRegisterInput(data) {
     errors.password = "Le mot de passe doit faire entre 6 et 30 caractères";
   }
 
+  if (Validator.isEmpty(data.sexe)) {
+    errors.sexe = "Le sexe est requis";
+  }
+  if (Validator.isEmpty(data.departement)) {
+    errors.password = "Le département est requis";
+  }
+  if (Validator.isEmpty(data.city)) {
+    errors.password = "La ville est requis";
+  }
+
   if (!Validator.equals(data.password, data.confirmPassword)) {
     errors.confirmPassword = "Les mots de passe doivent correspondre";
     errors.password = "Les mots de passe doivent correspondre";

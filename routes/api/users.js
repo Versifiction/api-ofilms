@@ -18,8 +18,12 @@ let User = require("../../models/User");
 
 const BCRYPT_SALT_ROUNDS = 12;
 
-var whitelist = ["http://localhost:3000", "https://ofilms.herokuapp.com"];
-var corsOptions = {
+const whitelist = [
+  "http://localhost:3000",
+  "http://localhost:5000",
+  "https://ofilms.herokuapp.com"
+];
+const corsOptions = {
   origin: function(origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
       callback(null, true);

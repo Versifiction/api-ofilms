@@ -27,6 +27,23 @@ const limiter = rateLimit({
   max: 100 // requêtes max par Ip dans le délai indiqué (windowMS, soit 15min)
 });
 
+const whitelist = [
+  "http://localhost:3000",
+  "http://localhost:5000",
+  "https://ofilms.herokuapp.com"
+];
+const corsOptions = {
+  origin: function(origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  }
+};
+
+// app.use(cors());
+app.options("*", cors(corsOptions));
 app.use(xss()); // protège des failles XSS en nettoyant tous les req.body, req.query et req.params
 app.use(limiter); //
 app.use(morgan("tiny")); // log dans le serveur à chaque requête efectuée sur une route, "tiny" log le minimum
