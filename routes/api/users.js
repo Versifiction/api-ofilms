@@ -99,7 +99,6 @@ router.post("/register", cors(corsOptions), async function(req, res) {
 
 router.post("/login", cors(corsOptions), (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
-  console.log("errors ", errors);
 
   if (!isValid) {
     return res.status(400).json(errors);
@@ -108,18 +107,13 @@ router.post("/login", cors(corsOptions), (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  console.log("email ", email);
-  console.log("password ", password);
-
   User.findOne({ email }).then(user => {
     if (!user) {
-      console.log("pas d'user avec ce mail");
       errors.email = "Les identifiants rentrés ne sont pas valides";
       errors.password = "Les identifiants rentrés ne sont pas valides";
       return res.status(400).json(errors);
     }
 
-    console.log("un user a ce mail");
     bcrypt.compare(password, user.password).then(isMatch => {
       if (isMatch) {
         const payload = {
@@ -143,7 +137,6 @@ router.post("/login", cors(corsOptions), (req, res) => {
           );
         });
       } else {
-        console.log("mot de passe incorrect");
         errors.password = "Le mot de passe saisi n'est pas correct";
         // return res
         //   .status(400)
@@ -170,14 +163,9 @@ router.post("/forgotPassword", cors(corsOptions), (req, res) => {
   User.findOne({ email })
     .then(user => {
       if (user.length === 0) {
-        console.log("L'adresse e-mail n'est rattachée à aucun utilisateur");
-
-        // send error message to the client
         return res.status(404).json({
           message: "L'adresse e-mail n'est rattachée à aucun utilisateur"
         });
-      } else {
-        console.log("L'adresse e-mail est rattachée à un utilisateur");
       }
     })
     .catch(err => {
@@ -190,7 +178,6 @@ router.post("/forgotPassword", cors(corsOptions), (req, res) => {
   const myDate = new Date();
   const newDate = new Date(myDate);
 
-  // if the email exists, run this update to the account with the associated email
   User.updateOne(
     { email },
     {
@@ -240,7 +227,6 @@ router.post("/forgotPassword", cors(corsOptions), (req, res) => {
       }
     }).then(user => {
       if (user == null) {
-        console.error("Lien réinitialisation mot de passe invalide ou expiré");
         res
           .status(403)
           .send("Lien réinitialisation mot de passe invalide ou expiré");
@@ -263,12 +249,10 @@ router.put("/updatePasswordViaEmail", cors(corsOptions), (req, res) => {
     }
   }).then(user => {
     if (user == null) {
-      console.error("Lien réinitialisation mot de passe invalide ou expiré");
       res
         .status(403)
         .send("Lien réinitialisation mot de passe invalide ou expiré");
     } else if (user != null) {
-      console.log("L'utilisateur existe en base de données");
       bcrypt
         .hash(req.body.password, BCRYPT_SALT_ROUNDS)
         .then(hashedPassword => {
