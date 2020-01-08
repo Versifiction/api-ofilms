@@ -319,6 +319,19 @@ router.get("/user/:id/moviesLiked/:movie", cors(corsOptions), async function(
   res.send(user);
 });
 
+router.get("/user/:id/moviesDisliked/:movie", cors(corsOptions), async function(
+  req,
+  res
+) {
+  const id = req.params.id;
+  const movie = req.params.movie;
+  const user = await User.find({
+    _id: id,
+    moviesDisliked: { $in: { moviesDisliked: [movie] } }
+  });
+  res.send(user);
+});
+
 router.get("/user/:id/seriesLiked/:serie", cors(corsOptions), async function(
   req,
   res
@@ -328,6 +341,20 @@ router.get("/user/:id/seriesLiked/:serie", cors(corsOptions), async function(
   const user = await User.find({
     _id: id,
     seriesLiked: { $in: { seriesLiked: [serie] } }
+  });
+
+  res.send(user);
+});
+
+router.get("/user/:id/seriesDisliked/:serie", cors(corsOptions), async function(
+  req,
+  res
+) {
+  const id = req.params.id;
+  const serie = req.params.serie;
+  const user = await User.find({
+    _id: id,
+    seriesDisliked: { $in: { seriesDisliked: [serie] } }
   });
 
   res.send(user);
@@ -378,6 +405,21 @@ router.post(
 );
 
 router.post(
+  "/user/:id/add/seriesDisliked/:serie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const serie = req.params.serie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $addToSet: { seriesDisliked: serie } }
+    );
+    res.send(user);
+  }
+);
+
+router.post(
   "/user/:id/add/moviesLiked/:movie",
   cors(corsOptions),
   async function(req, res) {
@@ -387,6 +429,21 @@ router.post(
     const user = await User.updateOne(
       { _id: o_id },
       { $addToSet: { moviesLiked: movie } }
+    );
+    res.send(user);
+  }
+);
+
+router.post(
+  "/user/:id/add/moviesDisliked/:movie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const movie = req.params.movie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $addToSet: { moviesDisliked: movie } }
     );
     res.send(user);
   }
@@ -438,6 +495,21 @@ router.post(
 );
 
 router.post(
+  "/user/:id/remove/seriesDisliked/:serie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const serie = req.params.serie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $pull: { seriesDisliked: serie } }
+    );
+    res.send(user);
+  }
+);
+
+router.post(
   "/user/:id/remove/moviesLiked/:movie",
   cors(corsOptions),
   async function(req, res) {
@@ -447,6 +519,21 @@ router.post(
     const user = await User.updateOne(
       { _id: o_id },
       { $pull: { moviesLiked: movie } }
+    );
+    res.send(user);
+  }
+);
+
+router.post(
+  "/user/:id/remove/moviesDisliked/:movie",
+  cors(corsOptions),
+  async function(req, res) {
+    const id = req.params.id;
+    const movie = req.params.movie;
+    const o_id = new ObjectId(id);
+    const user = await User.updateOne(
+      { _id: o_id },
+      { $pull: { moviesDisliked: movie } }
     );
     res.send(user);
   }
