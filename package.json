@@ -19,7 +19,7 @@
     "helmet": "^3.21.2",
     "is-empty": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "mongo-sanitize": "^1.0.1",
     "mongodb": "^3.4.1",
     "mongoose": "^5.8.3",
